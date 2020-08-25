@@ -1,2 +1,2 @@
 # websiteProject
-web development project where I create a website
+Web Development project where I create my own website
