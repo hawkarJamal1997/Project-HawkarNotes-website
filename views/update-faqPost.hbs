@@ -1,0 +1,14 @@
+<div class="tileContainer">
+    <form action="/update-faqPost/{{id}}" method="post">
+        <div class="control">
+            Text: <input name="postText" class="textarea" placeholder="Write your post here..."><br>
+        </div>
+        {{#if error}}
+            <p>{{error}}</p>
+        {{/if}}
+        <div class="control">
+            <button class="button is-link" type="submit">Submit</button>
+            <a href="/faq" class="button is-light">Cancel</a>
+        </div>
+    </form>
+</div>
