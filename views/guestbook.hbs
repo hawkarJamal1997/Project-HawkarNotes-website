@@ -1,0 +1,28 @@
+<div class="tileContainer">
+  <a href="createGuestbookPosts" class="button is-primary">Create post</a>
+  {{#each Guestbook}}
+    <div class="tile is-ancestor is-vertical">
+      <div class="tile is-parent">
+        <div class="tile is-child box">
+          {{#if ../isLoggedIn}}
+          <div class="level-right">
+            <form action="/delete-post/{{id}}" method="POST">
+              <button class="button is-danger" type="submit">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </form>
+            
+            <form action="/update-post/{{id}}" method="GET">
+              <button class="button is-info" type="submit">
+                <i class="fas fa-edit"></i>
+              </button>
+            </form>
+          </div>
+          {{/if}}
+          <p class="title">{{title}}</p>
+          <p>{{postText}}</p>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div>

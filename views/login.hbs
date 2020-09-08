@@ -1,0 +1,33 @@
+<div class="tileContainer">
+    {{#each error}}
+        {{this}}
+    {{/each}}
+    <form action="/login" method="POST">
+        <div class="field" style="margin-right:55vh; margin-left:55vh;">
+            <p class="control has-icons-left has-icons-right">
+                <input class="input" type="text" name="username" placeholder="Username" value="hawkar">
+                <span class="icon is-small is-left">
+                    <i class="fas fa-user-circle"></i>
+                </span>
+            </p>
+        </div>
+        <div class="field" style="margin-right:55vh; margin-left:55vh;">
+            <p class="control has-icons-left">
+                <input class="input" type="password" name="password" placeholder="Password" value="123456789">
+                <span class="icon is-small is-left">
+                    <i class="fas fa-lock"></i>
+                </span>
+            </p>
+        </div>
+        <div>
+            <input class="button is-success" type="submit" value="Login" style="margin-left:55vh;">
+            {{#if isLoggedIn}}   
+                <a href="/logout">
+                    <input class="button is-danger" name="Logout" value="Logout" style="width: 85px;" >
+                </a>
+            {{/if}}
+        </div>
+    </form>
+</div>
+
+
