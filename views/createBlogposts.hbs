@@ -1,8 +1,8 @@
 <div class="tileContainer">
     <form action="/createBlogposts" method="post">
         <div class="control">
-            Title: <input name="title" class="input" placeholder="Write the title here..."><br>
-            Text: <input name="postText" class="textarea" placeholder="Write your post here..."><br>
+            Title: <input required name="title" class="input" placeholder="Write the title here..."><br>
+            Text: <textarea required name="postText" class="textarea" placeholder="Write your post here..."></textarea><br>
         </div>
         {{#if error}}
             <p>{{error}}</p>
