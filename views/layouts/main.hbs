@@ -10,22 +10,32 @@
 
 </head>
 <body>
-    <nav>
-        <input type="checkbox" id="menu-checkbox">
-        <label for="menu-checkbox" class="checkbtn">
-            <i class="fas fa-bars"></i>
-        </label>
-        <label class="logo">HawkarNotes</label>
-        <ul>
-            <li><a href="/">Start</a></li>
-            <li><a href="/blogpost">Blogpost</a></li>
-            <li><a href="/guestbook">Guestbook</a></li>
-            <li><a href="/faq">FAQ</a></li>
-            <li><a href="/contact">Contact</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
+    <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/"><strong>HawkarNotes</strong></a>
+            <a role="button" class="navbar-burger burger" onclick="document.querySelector('.navbar-menu').classList.toggle('is-active');" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+                <a href="/blogpost" class="navbar-item">Blogpost</a>
+                <a href="/guestbook" class="navbar-item">Guestbook</a>
+                <a href="/faq" class="navbar-item">Faq</a>
+                <a href="/contact" class="navbar-item">Contact</a>
+                <a href="/about" class="navbar-item">About</a>
+            </div>
+        </div>
     </nav>
-    {{{body}}}
-    
+    {{{body}}}  
 </body>
+<footer>
+    <a href="#"><span class="fab fa-facebook-f"></span></a>
+    <a href="#"><span class="fab fa-twitter"></span></a>
+    <a href="#"><span class="fab fa-instagram"></span></a>
+    <a href="#"><span class="fab fa-youtube"></span></a> <br>
+    <a href="/login">Login</a>
+</footer>
 </html>
