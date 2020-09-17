@@ -32,10 +32,16 @@
     {{{body}}}  
 </body>
 <footer>
-    <a href="#"><span class="fab fa-facebook-f"></span></a>
-    <a href="#"><span class="fab fa-twitter"></span></a>
-    <a href="#"><span class="fab fa-instagram"></span></a>
-    <a href="#"><span class="fab fa-youtube"></span></a> <br>
-    <a href="/login">Login</a>
+    <a href="#"><span class="fab fa-facebook-f has-text-link"></span></a>
+    <a href="#"><span class="fab fa-twitter has-text-info"></span></a>
+    <a href="#"><span class="fab fa-instagram has-text-warning"></span></a>
+    <a href="#"><span class="fab fa-youtube has-text-danger"></span></a> <br>
+    {{#if isLoggedIn}}
+        <form action="/logout" method="POST">
+            <input class="button is-danger" type="submit" value="Logout" style="margin-right:55vh; margin-left:55vh;">
+        </form>
+    {{else}}
+        <a href="/login" class="has-text-link">Login</a>
+    {{/if}}
 </footer>
 </html>
