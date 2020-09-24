@@ -2,10 +2,12 @@ const express = require('express')
 const expressHandlebars = require('express-handlebars')
 const expressSession = require('express-session')
 const bodyParser = require('body-parser')
-const bcrypt = require('bcrypt');
-const appDB = require('./db.js');
-const { callbackify } = require('util');
+const cookieParser = require('cookie-parser')
+const csrf = require('csurf')
+const bcrypt = require('bcrypt')
+const appDB = require('./db.js')
 
+const csrfProtection = csrf({cookie: true})
 
 const app = express()
 
@@ -16,7 +18,7 @@ app.use(expressSession({
 }))
 
 app.use(bodyParser.urlencoded({extended:false}))
-
+app.use(cookieParser())
 
 app.use(express.static("public"))
 
@@ -38,7 +40,7 @@ app.get('/', function(req, res){
     res.render("index.hbs",{isLoggedIn: isLoggedIn})
 })
 
-app.get('/blogpost', function(req, res){
+app.get('/blogpost', csrfProtection, function(req, res){
     const errors = []
     const isLoggedIn = req.session.isLoggedIn
 
@@ -49,30 +51,45 @@ app.get('/blogpost', function(req, res){
         const model = {
             Blogpost: Blogpost,
             isLoggedIn: isLoggedIn,
+            token: req.csrfToken(),
             errors: errors
         }
         res.render("blogpost.hbs", model)
     })
 })
 
-app.get('/guestbook', function(req, res){
+app.get('/guestbook/:page', csrfProtection, function(req, res){
     const errors = []
     const isLoggedIn = req.session.isLoggedIn
+    const limit = 3
+    var page = req.params.page
 
-    appDB.retrieveAllGuestbooks(function(error, Guestbook){
+    const offset = (page -1) * limit
+    var nextPage = Number(page) + 1;
+    var previousPage = page - 1;
+    if(page == 1){
+        previousPage = 1;
+    }
+
+    
+
+    appDB.retrieveAllGuestbooks(offset, function(error, Guestbook){
         if(error) {
             errors.push("Database error! Try again late.")
         }
         const model = {
             Guestbook: Guestbook,
             isLoggedIn: isLoggedIn,
+            nextPage: nextPage,
+            previousPage: previousPage,
+            token: req.csrfToken(),
             error: errors
         }
         res.render("guestbook.hbs", model)
     })
 })
 
-app.get('/faq', function(req, res){
+app.get('/faq',csrfProtection, function(req, res){
     const errors = []
     const isLoggedIn = req.session.isLoggedIn
 
@@ -83,6 +100,7 @@ app.get('/faq', function(req, res){
         const model = {
             Faq: Faq,
             isLoggedIn: isLoggedIn,
+            token: req.csrfToken(),
             error: errors
         }
         res.render("faq.hbs", model)
@@ -103,15 +121,21 @@ app.get('/contact', function(req, res){
 
 
 //--------------CREATE BLOGPOST--------------//
-app.get('/createBlogposts', function(req, res){
-    res.render("createBlogposts.hbs")
+app.get('/createBlogposts', csrfProtection, function(req, res){
+    const isLoggedIn = req.session.isLoggedIn
+
+    if(!isLoggedIn) {
+        res.redirect("/login")
+        return;
+    }
+    res.render("createBlogposts.hbs", {token: req.csrfToken()})
 })
 
-app.post('/createBlogposts', function(req, res){
+app.post('/createBlogposts', csrfProtection, function(req, res){
     const title = req.body.title
     const postText = req.body.postText
     const errors = []
-    
+   
     if(title == "" || postText == ""){
         errors.push("Please fill out both forms!")
         res.render("createBlogposts.hbs", {error: errors})
@@ -127,33 +151,42 @@ app.post('/createBlogposts', function(req, res){
 })
 
 //------UPDATE FOR BLOGPOSTS------//
-app.get('/update-blogpost/:id', function(req, res){
+app.get('/update-blogpost/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const isLoggedIn = req.session.isLoggedIn
     
+    const model = {
+        id: id,
+        token: req.csrfToken()
+    }
     if(!isLoggedIn) {
         res.redirect("/login")
         return;
     }
-    res.render("update-blogpost.hbs", {id: id})
+    res.render("update-blogpost.hbs", model)
 })
 
-app.post('/update-blogpost/:id', function(req, res){
+app.post('/update-blogpost/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const postText = req.body.postText
     const errors = []
-   
-    appDB.updateBlogpostByID(id, postText, function(error){
-        if(error){
-            errors.push("Error! could not edit post.")
-            res.render("blogpost.hbs", {error: errors})
-        }
-    })
-    res.redirect('/blogpost')
+
+    if(postText == ""){
+        errors.push("Please write something!")
+        res.render("update-blogpost.hbs", {id: id, error: errors})
+    } else{
+        appDB.updateBlogpostByID(id, postText, function(error){
+            if(error){
+                errors.push("Error! could not edit post.")
+                res.render("blogpost.hbs", {error: errors})
+            }
+        })
+        res.redirect('/blogpost')
+    }
 })
 
 //------DELETE FOR BLOGPOSTS------//
-app.post('/delete-blogpost/:id', function(req, res){
+app.post('/delete-blogpost/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const errors = []
 
@@ -168,15 +201,15 @@ app.post('/delete-blogpost/:id', function(req, res){
 
 
 //--------------CREATE GUESTBOOK--------------//
-app.get('/createGuestbooks', function(req, res){
-    res.render("createGuestbooks.hbs")
+app.get('/createGuestbooks', csrfProtection, function(req, res){
+    res.render("createGuestbooks.hbs", {token: req.csrfToken()})
 })
 
-app.post('/createGuestbooks', function(req, res){
+app.post('/createGuestbooks', csrfProtection, function(req, res){
     const title = req.body.title
     const postText = req.body.postText
     const errors = []
-
+    
     if(title == "" || postText == ""){
         errors.push("Please fill out both forms!")
         res.render("createGuestbooks.hbs", {error: errors})
@@ -187,38 +220,47 @@ app.post('/createGuestbooks', function(req, res){
                 res.render("createGuestbooks.hbs", {error: errors})
             }
         })
-        res.redirect("/guestbook")
+        res.redirect("/guestbook/0")
     }    
 })
 
 //------UPDATE FOR GUESTBOOK------//
-app.get('/update-guestbook/:id', function(req, res){
+app.get('/update-guestbook/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const isLoggedIn = req.session.isLoggedIn
     
+    const model = {
+        id: id,
+        token: req.csrfToken()
+    }
     if(!isLoggedIn) {
         res.redirect("/login")
         return;
     }
-    res.render("update-guestbook.hbs", {id: id})
+    res.render("update-guestbook.hbs", model)
 })
 
-app.post('/update-guestbook/:id', function(req, res){
+app.post('/update-guestbook/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const postText = req.body.postText
     const errors = []
 
-    appDB.updateGuestbookByID(id, postText, function(error){
-        if(error){
-            errors.push("Error! could not edit post.")
-            res.render("guestbook.hbs", {error: errors})
-        }
-    })
-    res.redirect('/guestbook')
+    if(postText == ""){
+        errors.push("Please write something!")
+        res.render("update-guestbook.hbs", {id: id, error: errors})
+    }else{
+        appDB.updateGuestbookByID(id, postText, function(error){
+            if(error){
+                errors.push("Error! could not edit post.")
+                res.render("guestbook.hbs", {error: errors})
+            }
+        })
+        res.redirect('/guestbook')
+    }
 })
 
 //------DELETE FOR GUESTBOOK------//
-app.post('/delete-guestbook/:id', function(req, res){
+app.post('/delete-guestbook/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const errors = []
 
@@ -233,11 +275,11 @@ app.post('/delete-guestbook/:id', function(req, res){
 
 
 //--------------CREATE FAQ--------------//
-app.get('/createFaqs', function(req, res){
-    res.render("createFaqs.hbs")
+app.get('/createFaqs', csrfProtection, function(req, res){
+    res.render("createFaqs.hbs", {token: req.csrfToken()})
 })
 
-app.post('/createFaqs', function(req, res){ 
+app.post('/createFaqs', csrfProtection, function(req, res){ 
     const title = req.body.title
     const postText = req.body.postText
     const errors = []
@@ -257,33 +299,42 @@ app.post('/createFaqs', function(req, res){
 })
 
 //------UPDATE FOR FAQ------//
-app.get('/update-faq/:id', function(req, res){
+app.get('/update-faq/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const isLoggedIn = req.session.isLoggedIn
     
+    const model = {
+        id: id,
+        token: req.csrfToken()
+    }
     if(!isLoggedIn) {
         res.redirect("/login")
         return;
     }
-    res.render("update-faq.hbs", {id: id})
+    res.render("update-faq.hbs", model)
 })
 
-app.post('/update-faq/:id', function(req, res){
+app.post('/update-faq/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const postText = req.body.postText
     const errors = []
 
-    appDB.updateFaqByID(id, postText, function(error){
-        if(error){
-            errors.push("Error! could not edit post.")
-            res.render("faq.hbs", {error: errors})
-        }
-    })
-    res.redirect('/faq')
+    if(postText== ""){
+        errors.push("Please write something!")
+        res.render("update-faq.hbs", {id: id, error: errors})
+    }else{
+        appDB.updateFaqByID(id, postText, function(error){
+            if(error){
+                errors.push("Error! could not edit post.")
+                res.render("faq.hbs", {error: errors})
+            }
+        })
+        res.redirect('/faq')
+    }
 })
 
 //------DELETE FOR Faq------//
-app.post('/delete-faq/:id', function(req, res){
+app.post('/delete-faq/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const errors = []
 
@@ -296,19 +347,17 @@ app.post('/delete-faq/:id', function(req, res){
     res.redirect("/faq")
 })
 
-app.get('/login', function(req, res){
+app.get('/login', csrfProtection, function(req, res){
     const isLoggedIn = req.session.isLoggedIn
-    res.render("login.hbs", {isLoggedIn: isLoggedIn})
+    res.render("login.hbs", {isLoggedIn: isLoggedIn, token: req.csrfToken})
 })
 
-app.post('/login', function(req, res){
+app.post('/login', csrfProtection, function(req, res){
     const username = req.body.username
     const password = req.body.password
     const hashedPassword = "$2b$10$OsiaY76faZu8o8s1QuEoVOL3ZZg5OUjGFpJuknybVLaJocgAYnwv."
     const errors = []
 
-   // bcrypt.hash(passwordToHash, 10, function(err, hash) {
-        //console.log(hash)
     if(username == "" || password == ""){
         errors.push("Please type in username and password!")
         res.render("login.hbs", {error: errors})
