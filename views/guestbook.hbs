@@ -1,18 +1,21 @@
 <div class="tileContainer">
-  <a href="createGuestbookPosts" class="button is-primary">Create post</a>
+  <a href="/createGuestbooks" class="button is-primary">Create post</a>
+  {{#unless Guestbook.length}}
+    <p>There is nothing here</p>
+  {{/unless}}
   {{#each Guestbook}}
     <div class="tile is-ancestor is-vertical">
       <div class="tile is-parent">
         <div class="tile is-child box">
           {{#if ../isLoggedIn}}
           <div class="level-right">
-            <form action="/delete-post/{{id}}" method="POST">
+            <form action="/delete-guestbook/{{id}}" method="POST">
+            <input type="hidden" name="_csrf" value="{{../token}}">
               <button class="button is-danger" type="submit">
                 <i class="fas fa-trash-alt"></i>
               </button>
             </form>
-            
-            <form action="/update-post/{{id}}" method="GET">
+            <form action="/update-guestbook/{{id}}" method="GET">
               <button class="button is-info" type="submit">
                 <i class="fas fa-edit"></i>
               </button>
@@ -25,4 +28,19 @@
       </div>
     </div>
   {{/each}}
+  <nav class="pagination" role="navigation" aria-label="pagination">
+    <a class="pagination-previous" href="{{previousPage}}">Previous</a>
+    <a class="pagination-next" href="{{nextPage}}">Next page</a>
+    <ul class="pagination-list">
+      <li>
+        <a class="pagination-link" href="1" aria-label="Goto page 1">1</a>
+      </li>
+      <li>
+        <a class="pagination-link" href="2" aria-label="Goto page 2">2</a>
+      </li>
+      <li>
+        <a class="pagination-link" href="3" aria-label="Goto page 3">3</a>
+      </li>
+    </ul>
+  </nav>
 </div>
