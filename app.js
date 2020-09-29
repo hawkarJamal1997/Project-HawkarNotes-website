@@ -270,7 +270,7 @@ app.post('/delete-guestbook/:id', csrfProtection, function(req, res){
             res.render("guestbook.hbs", {error: errors})
         }
     })
-    res.redirect("/guestbook")
+    res.redirect("/guestbook/1")
 })
 
 
@@ -333,7 +333,7 @@ app.post('/update-faq/:id', csrfProtection, function(req, res){
     }
 })
 
-//------DELETE FOR Faq------//
+//------DELETE FOR FAQ------//
 app.post('/delete-faq/:id', csrfProtection, function(req, res){
     const id = req.params.id
     const errors = []
@@ -345,6 +345,27 @@ app.post('/delete-faq/:id', csrfProtection, function(req, res){
         }
     })
     res.redirect("/faq")
+})
+
+//------SEARCH FOR FAQ------//
+app.get('/searchFaq', csrfProtection, function(req,res){
+    const errors = []
+    const searchText = req.query.searchText
+    const isLoggedIn = req.session.isLoggedIn
+
+    appDB.searchFaq(searchText, function(error, Faq){
+        if(error){
+            errors.push("Error!, could not find something.")
+        }
+        const model = {
+            Faq: Faq,
+            searchText: searchText,
+            isLoggedIn: isLoggedIn,
+            token: req.csrfToken(),
+            error: errors
+        }
+        res.render("faq.hbs", model)
+    })
 })
 
 app.get('/login', csrfProtection, function(req, res){
