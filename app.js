@@ -351,15 +351,17 @@ app.post('/delete-faq/:id', csrfProtection, function(req, res){
 app.get('/searchFaq', csrfProtection, function(req,res){
     const errors = []
     const searchText = req.query.searchText
+    const searchTime = req.query.searchTime
     const isLoggedIn = req.session.isLoggedIn
 
-    appDB.searchFaq(searchText, function(error, Faq){
+    appDB.searchFaq(searchText, searchTime, function(error, Faq){
         if(error){
             errors.push("Error!, could not find something.")
         }
         const model = {
             Faq: Faq,
             searchText: searchText,
+            searchTime: searchTime,
             isLoggedIn: isLoggedIn,
             token: req.csrfToken(),
             error: errors
