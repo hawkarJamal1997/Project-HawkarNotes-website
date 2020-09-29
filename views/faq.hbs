@@ -1,12 +1,38 @@
-<div id = page>
-    <header>
-        Notes by Hawkar
-    </header>
-    <main>
-        <h1>This is the FAQ Page.</h1>
-        <p>here are FAQ posts</p>
-    </main>
-    <footer>
-        Made by Hawkar J
-    </footer>
-</div>
+<div class="tileContainer">
+  <form action="/searchFaq" method="GET">
+    <input name="searchText" class="input" style="width: 300px; margin-bottom:5vh" placeholder="search for something here...">
+    <button class="button is-dark" type="submit">
+      <i class="fas fa-search"></i>
+    </button>
+  </form>
+  <a href="createFaqs" class="button is-primary">Ask a question</a>
+  {{#unless Faq.length}}
+    <p>There is nothing here</p>
+  {{/unless}}
+  {{#each Faq}}
+    <div class="tile is-ancestor is-vertical">
+      <div class="tile is-parent">
+        <div class="tile is-child box">
+          {{#if ../isLoggedIn}}
+          <div class="level-right">
+            <form action="/delete-faq/{{id}}" method="POST">
+            <input type="hidden" name="_csrf" value="{{../token}}">
+              <button class="button is-danger" type="submit">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </form>
+            
+            <form action="/update-faq/{{id}}" method="GET">
+              <button class="button is-info" type="submit">
+                <i class="fas fa-edit"></i>
+              </button>
+            </form>
+          </div>
+          {{/if}}
+          <p class="title">{{title}}</p>
+          <p>{{postText}}</p>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+  </div>
